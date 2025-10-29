@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Free bond investment calculator with live market data. Calculate bond prices, yields to maturity, and visualize the price-yield relationship for Treasury bonds.">
+    <meta name="keywords" content="bond calculator, investment calculator, treasury bonds, yield calculator, bond yield, YTM calculator, financial calculator">
+    <meta name="author" content="Bond Calculator">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Bond Investment Calculator - Free YTM & Price Calculator">
+    <meta property="og:description" content="Calculate bond prices and yields with live market data. Educational financial tool for bond analysis.">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Bond Investment Calculator">
+    <meta property="twitter:description" content="Free bond calculator with live Treasury yield data and interactive price-yield visualization.">
+    
+    <title>Bond Investment Calculator - Free YTM & Price Calculator</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Bond Investment Calculator</h1>
+        <p>Analyze bond prices, yields, and returns in real-time</p>
+    </header>
+
+    <main>
+        <!-- Input Section -->
+        <section class="input-section">
+            <h2>Bond Parameters</h2>
+            <form id="bondForm">
+                <div class="input-group">
+                    <label for="faceValue">Face Value (Par)</label>
+                    <input 
+                        type="number" 
+                        id="faceValue" 
+                        name="faceValue" 
+                        placeholder="1000"
+                        value="1000"
+                        min="1"
+                        step="0.01"
+                        required
+                        aria-label="Face value in dollars"
+                        aria-required="true"
+                    >
+                    <small class="hint">The bond's face value at maturity</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="couponRate">Coupon Rate (%)</label>
+                    <input 
+                        type="number" 
+                        id="couponRate" 
+                        name="couponRate" 
+                        placeholder="5.0"
+                        value="5"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        required
+                        aria-label="Annual coupon rate as percentage"
+                        aria-required="true"
+                    >
+                    <small class="hint">Annual interest rate paid on the bond</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="maturity">Years to Maturity</label>
+                    <input 
+                        type="number" 
+                        id="maturity" 
+                        name="maturity" 
+                        placeholder="10"
+                        value="10"
+                        min="0.01"
+                        step="0.01"
+                        required
+                        aria-label="Years until bond matures"
+                        aria-required="true"
+                    >
+                    <small class="hint">Time remaining until the bond reaches maturity</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="bondType">Bond Type</label>
+                    <select 
+                        id="bondType" 
+                        name="bondType"
+                        aria-label="Select bond type or enter custom yield"
+                    >
+                        <optgroup label="Treasury Bonds - Live Market Data">
+                            <option value="US1M">1-Month Treasury (US1M)</option>
+                            <option value="US3M">3-Month Treasury (US3M)</option>
+                            <option value="US6M">6-Month Treasury (US6M)</option>
+                            <option value="US1Y">1-Year Treasury (US1Y)</option>
+                            <option value="US2Y">2-Year Treasury (US2Y)</option>
+                            <option value="US3Y">3-Year Treasury (US3Y)</option>
+                            <option value="US5Y">5-Year Treasury (US5Y)</option>
+                            <option value="US7Y">7-Year Treasury (US7Y)</option>
+                            <option value="US10Y" selected>10-Year Treasury (US10Y)</option>
+                            <option value="US20Y">20-Year Treasury (US20Y)</option>
+                            <option value="US30Y">30-Year Treasury (US30Y)</option>
+                        </optgroup>
+                        <optgroup label="Custom">
+                            <option value="CUSTOM">Enter Custom Yield</option>
+                        </optgroup>
+                    </select>
+                    <small class="hint">Select live market data from US Treasury yield curve or enter custom yield</small>
+                </div>
+
+                <div class="input-group" id="yieldInputGroup" style="display: none;">
+                    <label for="yield">Market Yield (YTM %)</label>
+                    <input 
+                        type="number" 
+                        id="yield" 
+                        name="yield" 
+                        placeholder="5.0"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        aria-label="Market yield to maturity as percentage"
+                        aria-required="true"
+                    >
+                    <small class="hint">Enter custom yield value for calculations</small>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" id="calculateBtn">Calculate</button>
+                    <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message" role="alert" aria-live="assertive"></div>
+
+        <!-- Results Section -->
+        <section class="results-section">
+            <h2>Results</h2>
+            <div class="results-container">
+                <div class="results-card">
+                    <div class="result-label">Bond Price</div>
+                    <div class="result-value" id="bondPrice">$0.00</div>
+                    <small class="result-explanation">Present value of future cash flows</small>
+                </div>
+
+                <div class="results-card">
+                    <div class="result-label">Yield to Maturity</div>
+                    <div class="result-value" id="ytm">0.00%</div>
+                    <small class="result-explanation">Expected total return if held to maturity</small>
+                </div>
+
+                <div class="results-card">
+                    <div class="result-label">Price Change from Par</div>
+                    <div class="result-value" id="priceChange">0.00%</div>
+                    <small class="result-explanation">Difference from face value</small>
+                </div>
+
+                <div class="results-card explanation-card">
+                    <div class="result-label">Explanation</div>
+                    <p id="explanation">Enter bond parameters to see calculation results and analysis.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section class="chart-section">
+            <h2>Price vs Yield Curve</h2>
+            <div class="chart-container">
+                <canvas id="bondChart"></canvas>
+            </div>
+            <small class="hint">Visual representation of the inverse relationship between bond price and yield</small>
+        </section>
+
+        <!-- Live Market Data Section -->
+        <section class="market-data-section">
+            <h2>Live Market Data</h2>
+            <div id="liveData" class="market-data-container">
+                <p class="loading-text">Select a bond type to view live market data</p>
+            </div>
+        </section>
+
+        <!-- Portfolio Dashboard Section -->
+        <section class="portfolio-section">
+            <div class="portfolio-header">
+                <h2>Bond Portfolio Dashboard</h2>
+                <div class="portfolio-actions">
+                    <button type="button" class="btn btn-secondary" id="addToPortfolioBtn">Add Current Bond</button>
+                    <button type="button" class="btn btn-secondary" id="clearPortfolioBtn">Clear Portfolio</button>
+                </div>
+            </div>
+            
+            <div id="portfolioInfo" class="portfolio-info">
+                <p>No bonds in portfolio. Calculate a bond and click "Add to Portfolio" to start building your portfolio.</p>
+            </div>
+            
+            <div id="portfolioDashboard" style="display: none;">
+                <!-- Portfolio Summary Metrics -->
+                <div class="dashboard-summary">
+                    <h3>Portfolio Summary</h3>
+                    <div class="summary-metrics-grid">
+                        <div class="summary-metric-card">
+                            <div class="summary-metric-label">Total Portfolio Value</div>
+                            <div class="summary-metric-value" id="totalValue">$0.00</div>
+                            <div class="summary-metric-subtitle">Sum of all bond prices</div>
+                        </div>
+                        <div class="summary-metric-card">
+                            <div class="summary-metric-label">Weighted Average Yield</div>
+                            <div class="summary-metric-value" id="avgYield">0.00%</div>
+                            <div class="summary-metric-subtitle">Portfolio-wide YTM</div>
+                        </div>
+                        <div class="summary-metric-card">
+                            <div class="summary-metric-label">Number of Bonds</div>
+                            <div class="summary-metric-value" id="bondCount">0</div>
+                            <div class="summary-metric-subtitle">Positions in portfolio</div>
+                        </div>
+                        <div class="summary-metric-card">
+                            <div class="summary-metric-label">Expected Annual Return</div>
+                            <div class="summary-metric-value" id="expectedReturn">$0.00</div>
+                            <div class="summary-metric-subtitle">From coupon payments</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Comparison Chart -->
+                <div class="dashboard-chart-card">
+                    <h3>Portfolio vs Treasury Benchmarks</h3>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Individual Bond Charts -->
+                <div class="dashboard-chart-card">
+                    <h3>Individual Bond Price Comparison</h3>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="portfolioPriceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Yield Distribution Chart -->
+                <div class="dashboard-chart-card">
+                    <h3>Yield Distribution</h3>
+                    <div class="chart-container" style="height: 350px;">
+                        <canvas id="yieldChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Individual Bonds Detail -->
+                <div class="dashboard-section">
+                    <h3>Individual Bond Details</h3>
+                    <div id="portfolioList" class="portfolio-list-grid"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Educational tool for bond analysis | Not financial advice</p>
+    </footer>
+
+    <script src="scripts/calculator.js"></script>
+    <script src="scripts/api.js"></script>
+    <script src="scripts/chart.js"></script>
+    <script src="scripts/portfolio.js"></script>
+</body>
+</html>
+
