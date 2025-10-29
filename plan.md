@@ -1,9 +1,7 @@
 # Product Requirements Document
 ## Bond Investment Calculator
 
-**Version:** 1.0  
-**Date:** January 2025  
-**Status:** Draft
+
 
 ---
 
@@ -308,6 +306,3 @@ YTM ≈ [Coupon + (Face - Price)/n] / [(Face + Price)/2]
 
 ---
 
-**Document Owner**: Product Team  
-**Last Updated**: January 2025  
-**Next Review**: February 2025
